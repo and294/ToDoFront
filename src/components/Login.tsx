@@ -21,17 +21,17 @@ export default function Login(props) {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        dispatch(signInToStore({token: data.token, name: data.name}))
+        dispatch(signInToStore({token: data.token, name: data.name}));
+        props.activateToggle(); // Move this inside the signIn function
       });
     setSignInUsername("");
     setSignInPassword("");
-    props.activateToggle()
   };
 
   const signOut = () => {
     setShowInputs(true);
     dispatch(logoutFromStore())
+    props.activateToggle();
   };
 
   let signedIn;

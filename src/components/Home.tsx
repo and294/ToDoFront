@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import ToDoCard from "./ToDoCard";
 import Login from "./Login";
 
@@ -15,42 +15,42 @@ export default function Home({}: Props) {
     };
   }
   const [listFetched, setListFetched] = useState<listItem[]>([]);
-  const [toggle, setToggle] = useState<Boolean>(true)
+  const [toggle, setToggle] = useState<Boolean>(true);
 
   const name = useSelector((state) => state.user.value.name);
-  const token = useSelector((state) => state.user.value.name);
+  const token = useSelector((state) => state.user.value.token);
 
+  //fetch les todo de l'utilisateur
   const getList = async () => {
     await fetch(`http://localhost:3000/users/get/${token}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        setListFetched(data);
+        setListFetched(data.toDo);
         console.log(listFetched);
       });
   };
 
-  const activateToggle = () =>{
-    setToggle(!toggle)
-    console.log(toggle)
-  }
+  //Toggle pour activer le useEffect lors de la connection/déconnection
+  const activateToggle = useCallback(() => {
+    setToggle((prevToggle) => !prevToggle);
+  }, []);
+
+  //Récupere les todo de l'utilisateur
+  useEffect(() => {
+    if (token !== null) {
+      getList();
+    }
+  }, [activateToggle, token]);
 
   useEffect(() => {
-    if(token !== null){
-      getList();
-    } 
+    console.log("Toggle state changed:", toggle);
   }, [toggle]);
-
   let title;
 
-  if(name == null){
-    title = (
-      <h1>To do</h1>
-    )
+  if (name == null) {
+    title = <h1>To do</h1>;
   } else {
-    title = (
-      <h1>{name}'s To do</h1>
-    )
+    title = <h1>{name}'s To do</h1>;
   }
 
   const listToRender = listFetched.map((data, i) => {
@@ -59,7 +59,7 @@ export default function Home({}: Props) {
 
   return (
     <div>
-      <Login activateToggle={activateToggle}/>
+      <Login activateToggle={activateToggle} />
       {title}
       {listToRender}
     </div>
