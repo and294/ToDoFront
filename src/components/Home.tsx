@@ -16,11 +16,17 @@ export default function Home({}: Props) {
       done: boolean;
     };
   }
+
+  //Nombres pour la notation de la priorité de la todo
+  let options = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1000000];
+
   const [listFetched, setListFetched] = useState<listItem[]>([]);
-  const [toggle, setToggle] = useState<Boolean>(true);
-  const [loggedIn, setLoggedIn] = useState<Boolean>(false);
-  const [signIn, setSignIn] = useState<Boolean>(false);
-  const [signUp, setSignUp] = useState<Boolean>(false);
+  const [toggle, setToggle] = useState<boolean>(true);
+  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [signIn, setSignIn] = useState<boolean>(false);
+  const [signUp, setSignUp] = useState<boolean>(false);
+  const [todoName, setTodoName] = useState<string>("");
+  const [todoPriority, setTodoPriority] = useState<number>(options[0]);
 
   const name = useSelector((state) => state.user.value.name);
   const token = useSelector((state) => state.user.value.token);
@@ -45,7 +51,7 @@ export default function Home({}: Props) {
     if (token !== null) {
       getList();
     }
-  }, [activateToggle, token]);
+  }, [toggle, token]);
 
   useEffect(() => {
     console.log("Toggle state changed:", toggle);
@@ -118,10 +124,60 @@ export default function Home({}: Props) {
     );
   }
 
+  //Ajouter une todo
+  const addTodo = () => {
+    fetch(`http://localhost:3000/users/add/${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ task: todoName, priority: todoPriority }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+        setTodoName("");
+        setTodoPriority(options[0]);
+        activateToggle();
+      });
+  };
+
+  //Supprimer Todo
+
+  //Afficher l'input ajouter todo si l'utilisateur est connecté
+  let addTodoInput;
+
+  if (loggedIn) {
+    addTodoInput = (
+      <div>
+        <input
+          type="text"
+          placeholder="To do to add"
+          value={todoName}
+          onChange={(e) => setTodoName(e.target.value)}
+        ></input>
+        <select
+          value={todoPriority}
+          onChange={(e) => setTodoPriority(e.target.value)}
+        >
+          {options.map((value) => {
+            return (
+              <option value={value} key={value}>
+                {value}
+              </option>
+            );
+          })}
+        </select>
+        <button onClick={addTodo}>Add</button>
+      </div>
+    );
+  } else {
+    addTodoInput = <div></div>;
+  }
+
   return (
     <div className={styles.main}>
       <div className={styles.header}>{headerContent}</div>
       {title}
+      {addTodoInput}
       {listToRender}
     </div>
   );
