@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
 import { signInToStore, logoutFromStore } from "@/reducers/user";
 import styles from "@/styles/Login.module.css";
-import SignUp from "./SignUp";
 
 type Props = {};
 

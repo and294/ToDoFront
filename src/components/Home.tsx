@@ -70,16 +70,6 @@ export default function Home({}: Props) {
     setLoggedIn(status);
   };
 
-  //Render les todos quand l'utilisateur est connecté
-  let listToRender;
-
-  if (loggedIn) {
-    listToRender = listFetched.map((data, i) => {
-      return <ToDoCard key={i} {...data} />;
-    });
-  } else {
-    listToRender = <h2>Sign in to see and add todos</h2>;
-  }
 
   //Afficher le signIn ou signUp
 
@@ -126,21 +116,47 @@ export default function Home({}: Props) {
 
   //Ajouter une todo
   const addTodo = () => {
-    fetch(`http://localhost:3000/users/add/${token}`, {
+    if(todoName.length > 0){
+       fetch(`http://localhost:3000/users/add/${token}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ task: todoName, priority: todoPriority }),
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setTodoName("");
         setTodoPriority(options[0]);
         activateToggle();
       });
+    }
   };
 
   //Supprimer Todo
+  const deleteTodo = (id: string) => {
+    fetch(`http://localhost:3000/users/delete/${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        activateToggle();
+      });
+  }
+
+  //Cocher todo si fait
+  const doneTodo = (id: string) => {
+    fetch(`http://localhost:3000/users/done/${token}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: id }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        activateToggle();
+        console.log(data)
+      });
+  }
 
   //Afficher l'input ajouter todo si l'utilisateur est connecté
   let addTodoInput;
@@ -172,6 +188,18 @@ export default function Home({}: Props) {
   } else {
     addTodoInput = <div></div>;
   }
+
+    //Render les todos quand l'utilisateur est connecté
+  let listToRender;
+
+  if (loggedIn) {
+    listToRender = listFetched.map((data, i) => {
+      return <ToDoCard key={i} {...data} deleteTodo={deleteTodo} doneTodo={doneTodo}/>;
+    });
+  } else {
+    listToRender = <h2>Sign in to see and add todos</h2>;
+  }
+
 
   return (
     <div className={styles.main}>
